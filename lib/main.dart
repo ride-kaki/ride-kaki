@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ride_kaki/screens/result/result_screen.dart';
+import 'package:ride_kaki/screens/home/home_screen.dart';
 
 void main() {
   runApp(const MyApp());

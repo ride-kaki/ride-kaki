@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:ride_kaki/screens/result/search_button.dart';
+import 'package:ride_kaki/screens/home/result_card.dart';
+import 'package:ride_kaki/screens/home/search_button.dart';
 import 'package:ride_kaki/screens/search/search_page.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -53,7 +54,8 @@ class _ResultScreenState extends State<ResultScreen> {
               _controller.complete(controller);
               newGoogleMapController = controller;
             },
-          )
+          ),
+          ResultCard(),
         ],
       ),
     );
