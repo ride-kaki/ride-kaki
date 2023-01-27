@@ -23,12 +23,15 @@ class ResultCard extends StatelessWidget {
     return DraggableScrollableSheet(
       controller: scrollController,
       initialChildSize: 0.35,
-      minChildSize: 0.1,
-      maxChildSize: 1,
+      minChildSize: 0.20,
+      maxChildSize: 0.9,
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(15)),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+            ),
             color: Colors.white,
             boxShadow: [
               BoxShadow(
@@ -69,11 +72,12 @@ class ResultCard extends StatelessWidget {
                 },
                 itemBuilder: (context, index) {
                   return ResultCardItem(
-                      company: company,
-                      location: location,
-                      price: price,
-                      logoUrl: logoUrl,
-                      onTap: onTap);
+                    company: company,
+                    location: location,
+                    price: price,
+                    logoUrl: logoUrl,
+                    onTap: onTap,
+                  );
                 },
               ),
             ],

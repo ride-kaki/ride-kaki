@@ -58,6 +58,46 @@ class _ResultScreenState extends State<ResultScreen> {
           ResultCard(),
         ],
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: FractionallySizedBox(
+          widthFactor: 0.8,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 15,
+            ),
+            child: SizedBox(
+              height: 45,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(
+                      Theme.of(context).colorScheme.secondary),
+                ),
+                onPressed: () {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "Book Ride in App",
+                          style: Theme.of(context).textTheme.button!.copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
