@@ -2,20 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:ride_kaki/screens/home/result_card_item.dart';
 import 'package:ride_kaki/utils/formats.dart';
 
-class ResultCard extends StatelessWidget {
+class ResultCard extends StatefulWidget {
+  // TODO: add parameter for List of Rides
   ResultCard({super.key});
 
-  String company = "JustGrab";
-  String location = "Lazada Building Exit B";
-  String logoUrl =
+  @override
+  State<ResultCard> createState() => _ResultCardState();
+}
+
+class _ResultCardState extends State<ResultCard> {
+  static const String company = "JustGrab";
+  static const String location = "Lazada Building Exit B";
+  static const String logoUrl =
       "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg";
-  double price = 16.69;
+  static const double price = 16.69;
+
+  int selectedIndex = -1;
 
   DraggableScrollableController scrollController =
       DraggableScrollableController();
 
-  void onTap() {
-    print("Button was clicked");
+  void onTap(int index) {
+    int newIndex = index;
+    if (index == selectedIndex) {
+      newIndex = -1;
+    }
+    setState(() {
+      selectedIndex = newIndex;
+    });
   }
 
   @override
@@ -52,7 +66,9 @@ class ResultCard extends StatelessWidget {
                 widthFactor: 0.10,
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(15),
+                    ),
                     color: Colors.grey.shade300,
                   ),
                   child: const SizedBox(
@@ -76,6 +92,8 @@ class ResultCard extends StatelessWidget {
                     location: location,
                     price: price,
                     logoUrl: logoUrl,
+                    index: index,
+                    isSelected: index == selectedIndex,
                     onTap: onTap,
                   );
                 },

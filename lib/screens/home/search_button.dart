@@ -17,15 +17,15 @@ class SearchButton extends StatelessWidget {
         fillColor: Colors.white,
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
         ),
         border: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.transparent),
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
         ),
         filled: true,
         hintStyle: TextStyle(

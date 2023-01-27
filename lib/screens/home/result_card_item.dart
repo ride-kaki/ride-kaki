@@ -6,8 +6,11 @@ class ResultCardItem extends StatelessWidget {
   String location;
   String logoUrl;
   double price;
-  void Function() onTap;
+  int index;
+  bool isSelected;
 
+  void Function(int) onTap;
+// TODO: add parameter for single Ride
   ResultCardItem({
     super.key,
     required this.company,
@@ -15,25 +18,38 @@ class ResultCardItem extends StatelessWidget {
     required this.price,
     required this.logoUrl,
     required this.onTap,
+    required this.index,
+    required this.isSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: SizedBox(
-        height: 50,
-        width: 50,
-        child: Image.network(logoUrl),
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.grey.shade300 : Colors.transparent,
       ),
-      // horizontalTitleGap: 5,
-      title: Text(
-        company,
-      ),
-      subtitle: Text(
-        location,
-      ),
-      trailing: Text(
-        formatMoney.format(price),
+      child: ListTile(
+        onTap: () {
+          onTap(index);
+        },
+        leading: SizedBox(
+          height: 50,
+          width: 50,
+          child: Image.network(logoUrl),
+        ),
+        // horizontalTitleGap: 5,
+        title: Text(
+          company,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        subtitle: Text(
+          location,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        trailing: Text(
+          formatMoney.format(price),
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
       ),
     );
   }
