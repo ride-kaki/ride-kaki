@@ -26,16 +26,27 @@ class ResultCardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: isSelected ? Colors.grey.shade300 : Colors.transparent,
+        color: isSelected ? Colors.grey.shade200 : Colors.transparent,
       ),
       child: ListTile(
         onTap: () {
           onTap(index);
         },
-        leading: SizedBox(
-          height: 50,
-          width: 50,
-          child: Image.network(logoUrl),
+        leading: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(
+              Radius.circular(
+                20,
+              ),
+            ),
+          ),
+          child: SizedBox(
+            height: 50,
+            width: 50,
+            child: Image.asset(
+              "assets/images/grab.png",
+            ),
+          ),
         ),
         // horizontalTitleGap: 5,
         title: Text(

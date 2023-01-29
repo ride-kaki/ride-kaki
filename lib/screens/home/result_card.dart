@@ -79,13 +79,10 @@ class _ResultCardState extends State<ResultCard> {
               const SizedBox(
                 height: 10,
               ),
-              ListView.separated(
+              ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: 20,
-                separatorBuilder: (context, index) {
-                  return const Divider();
-                },
                 itemBuilder: (context, index) {
                   return ResultCardItem(
                     company: company,

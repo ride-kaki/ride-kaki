@@ -6,14 +6,14 @@ import 'package:ride_kaki/screens/home/result_card.dart';
 import 'package:ride_kaki/screens/home/search_button.dart';
 import 'package:ride_kaki/screens/search/search_page.dart';
 
-class ResultScreen extends StatefulWidget {
-  const ResultScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<ResultScreen> createState() => _ResultScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _ResultScreenState extends State<ResultScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,

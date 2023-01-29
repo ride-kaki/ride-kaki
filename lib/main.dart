@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:ride_kaki/screens/home/home_screen.dart';
+import 'package:ride_kaki/screens/login/login_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'screens/login/splash_screen.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://tjaovrapeckaepoabxpa.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYW92cmFwZWNrYWVwb2FieHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzQ3MjA3NzQsImV4cCI6MTk5MDI5Njc3NH0.egGtBcCRLRtSO2ZCuCaCfZOwSYgbZg28XJsAXWDTWTk',
+  );
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +30,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ResultScreen(),
+      initialRoute: '/',
+      routes: <String, WidgetBuilder>{
+        '/': (_) => const SplashScreen(),
+        '/login': (_) => const LoginScreen(),
+        '/home': (_) => HomeScreen(),
+      },
     );
   }
 }
