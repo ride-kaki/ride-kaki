@@ -28,7 +28,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Ride Kaki',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.transparent,
+
+        // appbar and bottom appbar
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+        ),
+        bottomAppBarTheme: const BottomAppBarTheme(
+          surfaceTintColor: Colors.white,
+        ),
       ),
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
