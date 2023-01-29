@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ride_kaki/supabase/snackbar.dart';
 
-class SplashPage extends StatefulWidget {
-  const SplashPage({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  _SplashPageState createState() => _SplashPageState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashScreenState extends State<SplashScreen> {
   bool _redirectCalled = false;
   @override
   void didChangeDependencies() {
@@ -17,7 +17,10 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _redirect() async {
-    await Future.delayed(Duration.zero);
+    await Future.delayed(
+      // add 2 second delay for splash screen
+      const Duration(seconds: 2),
+    );
     if (_redirectCalled || !mounted) {
       return;
     }
@@ -25,7 +28,7 @@ class _SplashPageState extends State<SplashPage> {
     _redirectCalled = true;
     final session = supabase.auth.currentSession;
     if (session != null) {
-      Navigator.of(context).pushReplacementNamed('/account');
+      Navigator.of(context).pushReplacementNamed('/home');
     } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }

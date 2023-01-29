@@ -8,13 +8,23 @@ extension ShowSnackBar on BuildContext {
     required String message,
     Color backgroundColor = Colors.white,
   }) {
-    ScaffoldMessenger.of(this).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: backgroundColor,
-    ));
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+      ),
+    );
   }
 
   void showErrorSnackBar({required String message}) {
-    showSnackBar(message: message, backgroundColor: Colors.red);
+    showSnackBar(
+      message: message,
+      backgroundColor: Colors.red,
+    );
   }
 }

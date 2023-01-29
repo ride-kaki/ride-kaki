@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:ride_kaki/supabase/snackbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _redirecting = false;
   late final TextEditingController _emailController;
