@@ -1,16 +1,16 @@
-name: Build & Deploy Gh Pages
+#name: Build & Deploy Gh Pages
 
-on:
-  push:
-    branches: [ main ]
+#on:
+  #push:
+    #branches: [ main ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+#jobs:
+  #build:
+    #runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v1
-      - uses: bluefireteam/flutter-gh-pages@v7
-        with:
-          baseHref: /ride-kaki/
+    #steps:
+      #- uses: actions/checkout@v3
+      #- uses: subosito/flutter-action@v1
+      #- uses: bluefireteam/flutter-gh-pages@v7
+        #with:
+          #baseHref: /ride-kaki/
