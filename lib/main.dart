@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'Ride Kaki',
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: Colors.transparent,
+        scaffoldBackgroundColor: Colors.white,
 
         // appbar and bottom appbar
         appBarTheme: const AppBarTheme(
