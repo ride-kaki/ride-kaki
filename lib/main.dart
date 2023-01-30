@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ride_kaki/screens/home/home_screen.dart';
 import 'package:ride_kaki/screens/login/login_screen.dart';
+import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'screens/login/splash_screen.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/': (_) => const SplashScreen(),
         '/login': (_) => const LoginScreen(),
         '/home': (_) => HomeScreen(),
+        '/promo': (_) => PromoScreen()
       },
     );
   }

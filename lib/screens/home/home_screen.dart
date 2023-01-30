@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_kaki/screens/home/result_card.dart';
 import 'package:ride_kaki/screens/home/search_button.dart';
+import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/search_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,6 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  onPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PromoScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,11 +104,31 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         toolbarHeight: 80,
         centerTitle: true,
-        title: FractionallySizedBox(
-          widthFactor: 0.90,
-          child: SearchButton(
-            onTap: onTap,
-          ),
+        title: Row(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              flex: 7,
+              // child: FractionallySizedBox(
+              //   widthFactor: 0.90,
+              child: SearchButton(
+                onTap: onTap,
+              ),
+              // ),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            Flexible(
+              flex: 1,
+              child: IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: const Icon(Icons.discount),
+                  onPressed: onPressed),
+            )
+          ],
         ),
       ),
       body: Stack(

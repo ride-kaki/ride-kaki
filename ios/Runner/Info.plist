@@ -73,5 +73,7 @@
                 </array>
             </dict>
         </array>
+        <key>googleMapsApiKey</key>
+        <string>$(GOOGLE_MAPS_API_KEY)</string>
     </dict>
 </plist>
