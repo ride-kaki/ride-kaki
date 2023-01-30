@@ -7,6 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+  static Route<void> route() {
+    return MaterialPageRoute(builder: (context) => const LoginScreen());
+  }
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -51,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final session = data.session;
       if (session != null) {
         _redirecting = true;
-        Navigator.of(context).pushReplacementNamed('/account');
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     });
     super.initState();
