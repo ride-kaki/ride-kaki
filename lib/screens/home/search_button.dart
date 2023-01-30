@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 
 class SearchButton extends StatelessWidget {
   Function() onTap;
-  SearchButton({super.key, required this.onTap});
+  String locationText;
+  SearchButton({
+    super.key,
+    required this.onTap,
+    required this.locationText,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       cursorColor: Colors.grey,
       decoration: InputDecoration(
-        hintText: "Find the cheapest rides!",
+        hintText: locationText,
         prefixIcon: Icon(
           Icons.search,
           color: Colors.grey[800],

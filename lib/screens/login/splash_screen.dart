@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ride_kaki/screens/home/home_screen.dart';
+import 'package:ride_kaki/screens/login/login_screen.dart';
 import 'package:ride_kaki/supabase/snackbar.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -28,9 +30,15 @@ class _SplashScreenState extends State<SplashScreen> {
     _redirectCalled = true;
     final session = supabase.auth.currentSession;
     if (session != null) {
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushAndRemoveUntil(
+        HomeScreen.route(),
+        (_) => false,
+      );
     } else {
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushAndRemoveUntil(
+        LoginScreen.route(),
+        (_) => false,
+      );
     }
   }
 

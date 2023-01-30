@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ride_kaki/screens/home/home_screen.dart';
 import 'package:ride_kaki/screens/login/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,10 +9,11 @@ import 'screens/login/splash_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load();
+
   await Supabase.initialize(
-    url: 'https://tjaovrapeckaepoabxpa.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYW92cmFwZWNrYWVwb2FieHBhIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzQ3MjA3NzQsImV4cCI6MTk5MDI5Njc3NH0.egGtBcCRLRtSO2ZCuCaCfZOwSYgbZg28XJsAXWDTWTk',
+    url: dotenv.get('SUPABASE_URL', fallback: 'INVALID_KEY'),
+    anonKey: dotenv.get('SUPABASE_ANON_KEY', fallback: 'INVALID_KEY'),
   );
   runApp(
     const MyApp(),
@@ -39,12 +41,7 @@ class MyApp extends StatelessWidget {
           surfaceTintColor: Colors.white,
         ),
       ),
-      initialRoute: '/',
-      routes: <String, WidgetBuilder>{
-        '/': (_) => const SplashScreen(),
-        '/login': (_) => const LoginScreen(),
-        '/home': (_) => HomeScreen(),
-      },
+      home: SplashScreen(),
     );
   }
 }
