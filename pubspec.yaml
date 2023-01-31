@@ -49,6 +49,7 @@ dependencies:
   flutter_google_places_sdk: ^0.3.2+6
   # geolocator api
   geolocator: ^9.0.2
+  coupon_uikit: ^0.2.0
   # intl for formatting of data i.e money and distances
   intl: ^0.18.0
   # generate uuid

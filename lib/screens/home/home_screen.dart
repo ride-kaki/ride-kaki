@@ -8,6 +8,7 @@ import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
 import 'package:ride_kaki/cubits/geolocation/geolocation_cubit.dart';
 import 'package:ride_kaki/screens/home/result_card.dart';
 import 'package:ride_kaki/screens/home/search_button.dart';
+import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/places_search_delegate.dart';
 import 'package:ride_kaki/utils/constants.dart';
 import 'package:ride_kaki/utils/locations.dart';
@@ -85,6 +86,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  onPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PromoScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,14 +101,34 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         toolbarHeight: 80,
         centerTitle: true,
-        title: FractionallySizedBox(
-          widthFactor: 0.90,
-          child: SearchButton(
-            onTap: onTap,
-            locationText: searchResult == null
-                ? 'Find the cheapest deals'
-                : searchResult!.address!,
-          ),
+        title: Row(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              flex: 7,
+              // child: FractionallySizedBox(
+              //   widthFactor: 0.90,
+              child: SearchButton(
+                onTap: onTap,
+                locationText: searchResult == null
+                    ? 'Find the cheapest deals'
+                    : searchResult!.address!,
+              ),
+              // ),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            Flexible(
+              flex: 1,
+              child: IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: const Icon(Icons.discount),
+                  onPressed: onPressed),
+            )
+          ],
         ),
       ),
       body: BlocBuilder<GeolocationCubit, GeolocationState>(
