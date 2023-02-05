@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
     as google_places_sdk;
 import 'package:ride_kaki/cubits/geolocation/geolocation_cubit.dart';
 import 'package:ride_kaki/screens/home/result_card.dart';
 import 'package:ride_kaki/screens/home/search_button.dart';
+import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/places_search_delegate.dart';
 import 'package:ride_kaki/utils/constants.dart';
 import 'package:ride_kaki/utils/locations.dart';
@@ -35,6 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late GoogleMapController newGoogleMapController;
   late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   google_places_sdk.Place? searchResult;
+
+  Set<Marker> markers = {};
+  Set<Polyline> polylines = {};
+  List<LatLng> polylinesLatLng = [];
+  late PolylinePoints polylinePoints;
 
   void mapAnimateToLocation(double lat, double lng) async {
     LatLng latLngPosition = LatLng(
@@ -76,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   initState() {
     super.initState();
+    // initialise GooglePlacesSdk
     flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
       placesAPIKey,
       locale: placesLocale,
@@ -83,6 +91,65 @@ class _HomeScreenState extends State<HomeScreen> {
     flutterGooglePlacesSdk.isInitialized().then((value) {
       debugPrint('Places Initialized: $value');
     });
+
+    // initialise markers
+    displayPinsOnMap();
+    polylinePoints = PolylinePoints();
+    drawPolylines(latLngJurongGateway, latLngSMU);
+  }
+
+  void drawPolylines(LatLng src, LatLng dest) async {
+    PolylineResult polylineResult =
+        await polylinePoints.getRouteBetweenCoordinates(
+      placesAPIKey,
+      PointLatLng(
+        src.latitude,
+        src.longitude,
+      ),
+      PointLatLng(
+        dest.latitude,
+        dest.longitude,
+      ),
+    );
+
+    if (polylineResult.status == "OK") {
+      polylineResult.points.forEach((PointLatLng point) {
+        polylinesLatLng.add(LatLng(point.latitude, point.longitude));
+      });
+    }
+
+    setState(() {
+      polylines.add(Polyline(
+        width: 10,
+        polylineId: PolylineId("polyline"),
+        color: Colors.blue,
+        points: polylinesLatLng,
+      ));
+    });
+  }
+
+  displayPinsOnMap() {
+    markers.add(
+      const Marker(
+        markerId: MarkerId('sourcePin'),
+        position: latLngJurongGateway,
+      ),
+    );
+
+    markers.add(
+      const Marker(
+        markerId: MarkerId('destinationPin'),
+        position: latLngSMU,
+      ),
+    );
+  }
+
+  onPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PromoScreen(),
+      ),
+    );
   }
 
   @override
@@ -92,14 +159,34 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         toolbarHeight: 80,
         centerTitle: true,
-        title: FractionallySizedBox(
-          widthFactor: 0.90,
-          child: SearchButton(
-            onTap: onTap,
-            locationText: searchResult == null
-                ? 'Find the cheapest deals'
-                : searchResult!.address!,
-          ),
+        title: Row(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              flex: 7,
+              // child: FractionallySizedBox(
+              //   widthFactor: 0.90,
+              child: SearchButton(
+                onTap: onTap,
+                locationText: searchResult == null
+                    ? 'Find the cheapest deals'
+                    : searchResult!.address!,
+              ),
+              // ),
+            ),
+            const SizedBox(
+              width: 20,
+            ),
+            Flexible(
+              flex: 1,
+              child: IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  icon: const Icon(Icons.discount),
+                  onPressed: onPressed),
+            )
+          ],
         ),
       ),
       body: BlocBuilder<GeolocationCubit, GeolocationState>(
@@ -112,6 +199,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return Stack(
               children: [
                 GoogleMap(
+                  markers: markers,
+                  polylines: polylines,
                   initialCameraPosition: locationGooglePlex,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
