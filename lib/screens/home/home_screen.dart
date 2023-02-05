@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
     as google_places_sdk;
@@ -36,6 +37,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late GoogleMapController newGoogleMapController;
   late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   google_places_sdk.Place? searchResult;
+
+  Set<Marker> markers = {};
+  Set<Polyline> polylines = {};
+  List<LatLng> polylinesLatLng = [];
+  late PolylinePoints polylinePoints;
 
   void mapAnimateToLocation(double lat, double lng) async {
     LatLng latLngPosition = LatLng(
@@ -77,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   initState() {
     super.initState();
+    // initialise GooglePlacesSdk
     flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
       placesAPIKey,
       locale: placesLocale,
@@ -84,6 +91,57 @@ class _HomeScreenState extends State<HomeScreen> {
     flutterGooglePlacesSdk.isInitialized().then((value) {
       debugPrint('Places Initialized: $value');
     });
+
+    // initialise markers
+    displayPinsOnMap();
+    polylinePoints = PolylinePoints();
+    drawPolylines(latLngJurongGateway, latLngSMU);
+  }
+
+  void drawPolylines(LatLng src, LatLng dest) async {
+    PolylineResult polylineResult =
+        await polylinePoints.getRouteBetweenCoordinates(
+      placesAPIKey,
+      PointLatLng(
+        src.latitude,
+        src.longitude,
+      ),
+      PointLatLng(
+        dest.latitude,
+        dest.longitude,
+      ),
+    );
+
+    if (polylineResult.status == "OK") {
+      polylineResult.points.forEach((PointLatLng point) {
+        polylinesLatLng.add(LatLng(point.latitude, point.longitude));
+      });
+    }
+
+    setState(() {
+      polylines.add(Polyline(
+        width: 10,
+        polylineId: PolylineId("polyline"),
+        color: Colors.blue,
+        points: polylinesLatLng,
+      ));
+    });
+  }
+
+  displayPinsOnMap() {
+    markers.add(
+      const Marker(
+        markerId: MarkerId('sourcePin'),
+        position: latLngJurongGateway,
+      ),
+    );
+
+    markers.add(
+      const Marker(
+        markerId: MarkerId('destinationPin'),
+        position: latLngSMU,
+      ),
+    );
   }
 
   onPressed() {
@@ -141,6 +199,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return Stack(
               children: [
                 GoogleMap(
+                  markers: markers,
+                  polylines: polylines,
                   initialCameraPosition: locationGooglePlex,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,

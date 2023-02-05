@@ -47,6 +47,8 @@ dependencies:
   google_maps_flutter: ^2.2.3
   # places api
   flutter_google_places_sdk: ^0.3.2+6
+  # polylines and points for maps
+  flutter_polyline_points: ^1.0.0
   # geolocator api
   geolocator: ^9.0.2
   coupon_uikit: ^0.2.0
@@ -54,7 +56,6 @@ dependencies:
   intl: ^0.18.0
   # generate uuid
   uuid: ^3.0.6
-
 
 dev_dependencies:
   flutter_test:
