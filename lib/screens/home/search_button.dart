@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 class SearchButton extends StatelessWidget {
-  Function() onTap;
-  String locationText;
-  SearchButton({
+  final Function() onTap;
+  final String locationText;
+  final IconData iconData;
+
+  const SearchButton({
     super.key,
     required this.onTap,
     required this.locationText,
+    required this.iconData,
   });
 
   @override
@@ -16,7 +19,7 @@ class SearchButton extends StatelessWidget {
       decoration: InputDecoration(
         hintText: locationText,
         prefixIcon: Icon(
-          Icons.search,
+          iconData,
           color: Colors.grey[800],
         ),
         fillColor: Colors.white,
