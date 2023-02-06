@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,21 +42,105 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
-  List<LatLng> polylinesLatLng = [];
   late PolylinePoints polylinePoints;
 
-  void mapAnimateToLocation(double lat, double lng) async {
-    LatLng latLngPosition = LatLng(
-      lat,
-      lng,
-    );
-
+  void mapAnimateToTarget(LatLng targetLatLng) async {
     CameraPosition cameraPosition =
-        CameraPosition(target: latLngPosition, zoom: 14);
+        CameraPosition(target: targetLatLng, zoom: 14);
 
     newGoogleMapController.animateCamera(
       CameraUpdate.newCameraPosition(
         cameraPosition,
+      ),
+    );
+  }
+
+  void mapAnimateToBounds(LatLng firstLocation, LatLng secondLocation) {
+    final LatLng southwest = LatLng(
+      min(firstLocation.latitude, secondLocation.latitude),
+      min(firstLocation.longitude, secondLocation.longitude),
+    );
+
+    final LatLng northeast = LatLng(
+      max(firstLocation.latitude, secondLocation.latitude),
+      max(firstLocation.longitude, secondLocation.longitude),
+    );
+    LatLngBounds bounds = LatLngBounds(
+      southwest: southwest,
+      northeast: northeast,
+    );
+
+    newGoogleMapController.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        bounds,
+        10.0,
+      ),
+    );
+  }
+
+  void drawPolylines(LatLng? src, LatLng? dest) async {
+    List<LatLng> polylinesLatLng = [];
+    // if either src or destination is empty, there shouldn't be any polylines
+    if (src == null || dest == null) {
+      setState(() {
+        polylines = {};
+      });
+    }
+    // otherwise there should be a polyline, but we should clear the existing ones first
+    else {
+      PolylineResult polylineResult =
+          await polylinePoints.getRouteBetweenCoordinates(
+        gMapsAPIKey,
+        PointLatLng(
+          src.latitude,
+          src.longitude,
+        ),
+        PointLatLng(
+          dest.latitude,
+          dest.longitude,
+        ),
+      );
+
+      // replace all polylines with the current one
+      if (polylineResult.status == "OK") {
+        Set<Polyline> _polylines = {};
+
+        polylineResult.points.forEach((PointLatLng point) {
+          polylinesLatLng.add(LatLng(point.latitude, point.longitude));
+        });
+
+        _polylines.add(Polyline(
+          width: 5,
+          polylineId: const PolylineId("polyline"),
+          color: Colors.blue,
+          points: polylinesLatLng,
+        ));
+
+        setState(() {
+          polylines = _polylines;
+        });
+      }
+    }
+  }
+
+  void drawPin(LatLng? latLng, String id) {
+    markers.removeWhere((element) {
+      return element.markerId == MarkerId(id);
+    });
+    if (latLng != null) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(id),
+          position: latLng!,
+        ),
+      );
+    }
+  }
+
+  onPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PromoScreen(),
       ),
     );
   }
@@ -79,12 +164,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // set state is async, so we want to animate when the states are done setting
     // so these are local vars to track states
-    LatLng? _src =
-        LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
+    LatLng? _src = srcSearchResult == null
+        ? null
+        : LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
 
     ;
-    LatLng? _dest =
-        LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
+    LatLng? _dest = destSearchResult == null
+        ? null
+        : LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
 
     // update the states and local vars
     if (isUpdateDest) {
@@ -104,33 +191,34 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
+    // draw pins
+    drawPin(
+      isUpdateDest ? _dest : _src,
+      isUpdateDest ? 'destinationPin' : 'sourcePin',
+    );
+
     // check if the result selected was null
     if (result != null && result.latLng != null) {
       // if both locations are filled in
       if (_dest != null && _src != null) {
-        // draw pins
-        clearAllPins();
-        drawPin(
-          isUpdateDest ? _dest : _src,
-          isUpdateDest ? 'destinationPin' : 'sourcePin',
-        );
         // draw polylines
         drawPolylines(
           _src,
           _dest,
         );
         // animate to boundary locations
-        mapAnimateToLocation(result.latLng!.lat, result.latLng!.lng);
+        mapAnimateToBounds(_src, _dest);
       }
       // if the result isn't empty and there is 1 location filled, animate to 1 location
-      else if (_dest != null || _src != null) {
+      else if (_dest == null || _src == null) {
         LatLng _result = LatLng(result.latLng!.lat, result.latLng!.lng);
-        clearAllPins();
-        drawPin(
-          _result,
-          isUpdateDest ? 'destinationPin' : 'sourcePin',
+
+        drawPolylines(
+          _src,
+          _dest,
         );
-        mapAnimateToLocation(result.latLng!.lat, result.latLng!.lng);
+        // animate to single location
+        mapAnimateToTarget(isUpdateDest ? _dest! : _src!);
       }
 
       // initialise markers
@@ -150,66 +238,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     // initialise polylinePoints
     polylinePoints = PolylinePoints();
-  }
-
-  clearAllPolylines() {
-    polylines = {};
-    polylinesLatLng = [];
-  }
-
-  void drawPolylines(LatLng src, LatLng dest) async {
-    PolylineResult polylineResult =
-        await polylinePoints.getRouteBetweenCoordinates(
-      gMapsAPIKey,
-      PointLatLng(
-        src.latitude,
-        src.longitude,
-      ),
-      PointLatLng(
-        dest.latitude,
-        dest.longitude,
-      ),
-    );
-
-    if (polylineResult.status == "OK") {
-      polylineResult.points.forEach((PointLatLng point) {
-        polylinesLatLng.add(LatLng(point.latitude, point.longitude));
-      });
-      setState(() {
-        polylines.add(Polyline(
-          width: 5,
-          polylineId: const PolylineId("polyline"),
-          color: Colors.blue,
-          points: polylinesLatLng,
-        ));
-      });
-    } else {
-      setState(() {
-        polylines = {};
-        polylinesLatLng = [];
-      });
-    }
-  }
-
-  void clearAllPins() {
-    markers = {};
-  }
-
-  void drawPin(LatLng latLng, String id) {
-    markers.add(
-      Marker(
-        markerId: MarkerId(id),
-        position: latLng,
-      ),
-    );
-  }
-
-  onPressed() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PromoScreen(),
-      ),
-    );
   }
 
   @override
@@ -301,10 +329,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onMapCreated: (controller) {
                     _controller.complete(controller);
                     newGoogleMapController = controller;
-                    mapAnimateToLocation(
-                      state.position.latitude,
-                      state.position.longitude,
-                    );
+                    LatLng _latLng = LatLng(
+                        state.position.latitude, state.position.longitude);
+                    mapAnimateToTarget(_latLng);
                   },
                   zoomGesturesEnabled: true,
                   zoomControlsEnabled: true,
