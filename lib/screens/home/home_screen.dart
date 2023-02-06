@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
     newGoogleMapController.animateCamera(
       CameraUpdate.newLatLngBounds(
         bounds,
-        10.0,
+        20.0,
       ),
     );
   }
@@ -157,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
       delegate: PlacesSearchDelegate(
         searchFieldPlaceholder: "Search for your location",
         flutterGooglePlacesSdk: flutterGooglePlacesSdk,
+        // TODO: change to full search object with autocomplete details
         previousSearchResult:
             prevSearchResult == null ? '' : prevSearchResult.address!,
       ),
@@ -168,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ? null
         : LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
 
-    ;
     LatLng? _dest = destSearchResult == null
         ? null
         : LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
@@ -197,32 +197,30 @@ class _HomeScreenState extends State<HomeScreen> {
       isUpdateDest ? 'destinationPin' : 'sourcePin',
     );
 
+    // draw polylines
+    drawPolylines(
+      _src,
+      _dest,
+    );
+
     // check if the result selected was null
-    if (result != null && result.latLng != null) {
-      // if both locations are filled in
-      if (_dest != null && _src != null) {
-        // draw polylines
-        drawPolylines(
-          _src,
-          _dest,
-        );
-        // animate to boundary locations
-        mapAnimateToBounds(_src, _dest);
-      }
-      // if the result isn't empty and there is 1 location filled, animate to 1 location
-      else if (_dest == null || _src == null) {
-        LatLng _result = LatLng(result.latLng!.lat, result.latLng!.lng);
-
-        drawPolylines(
-          _src,
-          _dest,
-        );
-        // animate to single location
-        mapAnimateToTarget(isUpdateDest ? _dest! : _src!);
-      }
-
-      // initialise markers
+    // if both locations are filled in
+    if (_dest != null && _src != null) {
+      // animate to boundary locations
+      mapAnimateToBounds(_src, _dest);
     }
+    // if the result isn't empty and there is 1 location filled, animate to 1 location
+    else if (_dest == null && _src == null) {
+      //TODO: add animation to geolocation latlng
+      /*LatLng _latLng =*/
+      /*LatLng(state.position.latitude, state.position.longitude);*/
+      /*mapAnimateToTarget(_latLng);*/
+    } else if (_dest == null || _src == null) {
+      // animate to single location
+      mapAnimateToTarget(_src ?? _dest!);
+    }
+
+    // initialise markers
   }
 
   @override
@@ -336,9 +334,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   zoomGesturesEnabled: true,
                   zoomControlsEnabled: true,
                 ),
-                srcSearchResult == null && destSearchResult == null
-                    ? const SizedBox.shrink()
-                    : ResultCard(),
+                srcSearchResult != null && destSearchResult != null
+                    ? ResultCard()
+                    : const SizedBox.shrink(),
               ],
             );
           } else {
@@ -351,9 +349,8 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
-      bottomNavigationBar: srcSearchResult == null
-          ? const SizedBox.shrink()
-          : BottomAppBar(
+      bottomNavigationBar: srcSearchResult != null && destSearchResult != null
+          ? BottomAppBar(
               child: FractionallySizedBox(
                 widthFactor: 0.8,
                 child: Padding(
@@ -396,7 +393,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-            ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
