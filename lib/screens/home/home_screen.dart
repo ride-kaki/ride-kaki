@@ -36,7 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late GoogleMapController newGoogleMapController;
   late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
-  google_places_sdk.Place? searchResult;
+  google_places_sdk.Place? srcSearchResult;
+  google_places_sdk.Place? destSearchResult;
 
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
@@ -59,24 +60,80 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  onTap() async {
+  // isUpdateDest is a boolean flag that if is true, denotes that we're updating
+  // the destination, otherwise we're updating the src
+  onTap(bool isUpdateDest) async {
+    google_places_sdk.Place? prevSearchResult =
+        isUpdateDest ? destSearchResult : srcSearchResult;
+
     google_places_sdk.Place? result =
         await showSearch<google_places_sdk.Place?>(
       context: context,
       delegate: PlacesSearchDelegate(
-        searchFieldPlaceholder: "Enter your destination",
+        searchFieldPlaceholder: "Search for your location",
         flutterGooglePlacesSdk: flutterGooglePlacesSdk,
         previousSearchResult:
-            searchResult == null ? '' : searchResult!.address!,
+            prevSearchResult == null ? '' : prevSearchResult.address!,
       ),
     );
 
-    // if the result isnt empty, animate to the location
-    if (result != null && result.latLng != null) {
+    // set state is async, so we want to animate when the states are done setting
+    // so these are local vars to track states
+    LatLng? _src =
+        LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
+
+    ;
+    LatLng? _dest =
+        LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
+
+    // update the states and local vars
+    if (isUpdateDest) {
+      _dest = result == null
+          ? null
+          : LatLng(result.latLng!.lat, result.latLng!.lng);
+
       setState(() {
-        searchResult = result;
+        destSearchResult = result;
       });
-      mapAnimateToLocation(result.latLng!.lat, result.latLng!.lng);
+    } else {
+      _src = result == null
+          ? null
+          : LatLng(result.latLng!.lat, result.latLng!.lng);
+      setState(() {
+        srcSearchResult = result;
+      });
+    }
+
+    // check if the result selected was null
+    if (result != null && result.latLng != null) {
+      // if both locations are filled in
+      if (_dest != null && _src != null) {
+        // draw pins
+        clearAllPins();
+        drawPin(
+          isUpdateDest ? _dest : _src,
+          isUpdateDest ? 'destinationPin' : 'sourcePin',
+        );
+        // draw polylines
+        drawPolylines(
+          _src,
+          _dest,
+        );
+        // animate to boundary locations
+        mapAnimateToLocation(result.latLng!.lat, result.latLng!.lng);
+      }
+      // if the result isn't empty and there is 1 location filled, animate to 1 location
+      else if (_dest != null || _src != null) {
+        LatLng _result = LatLng(result.latLng!.lat, result.latLng!.lng);
+        clearAllPins();
+        drawPin(
+          _result,
+          isUpdateDest ? 'destinationPin' : 'sourcePin',
+        );
+        mapAnimateToLocation(result.latLng!.lat, result.latLng!.lng);
+      }
+
+      // initialise markers
     }
   }
 
@@ -85,23 +142,25 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // initialise GooglePlacesSdk
     flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
-      placesAPIKey,
-      locale: placesLocale,
+      gMapsAPIKey,
+      locale: gMapsPlacesLocale,
     );
     flutterGooglePlacesSdk.isInitialized().then((value) {
       debugPrint('Places Initialized: $value');
     });
-
-    // initialise markers
-    displayPinsOnMap();
+    // initialise polylinePoints
     polylinePoints = PolylinePoints();
-    drawPolylines(latLngJurongGateway, latLngSMU);
+  }
+
+  clearAllPolylines() {
+    polylines = {};
+    polylinesLatLng = [];
   }
 
   void drawPolylines(LatLng src, LatLng dest) async {
     PolylineResult polylineResult =
         await polylinePoints.getRouteBetweenCoordinates(
-      placesAPIKey,
+      gMapsAPIKey,
       PointLatLng(
         src.latitude,
         src.longitude,
@@ -116,30 +175,31 @@ class _HomeScreenState extends State<HomeScreen> {
       polylineResult.points.forEach((PointLatLng point) {
         polylinesLatLng.add(LatLng(point.latitude, point.longitude));
       });
+      setState(() {
+        polylines.add(Polyline(
+          width: 5,
+          polylineId: const PolylineId("polyline"),
+          color: Colors.blue,
+          points: polylinesLatLng,
+        ));
+      });
+    } else {
+      setState(() {
+        polylines = {};
+        polylinesLatLng = [];
+      });
     }
-
-    setState(() {
-      polylines.add(Polyline(
-        width: 10,
-        polylineId: PolylineId("polyline"),
-        color: Colors.blue,
-        points: polylinesLatLng,
-      ));
-    });
   }
 
-  displayPinsOnMap() {
-    markers.add(
-      const Marker(
-        markerId: MarkerId('sourcePin'),
-        position: latLngJurongGateway,
-      ),
-    );
+  void clearAllPins() {
+    markers = {};
+  }
 
+  void drawPin(LatLng latLng, String id) {
     markers.add(
-      const Marker(
-        markerId: MarkerId('destinationPin'),
-        position: latLngSMU,
+      Marker(
+        markerId: MarkerId(id),
+        position: latLng,
       ),
     );
   }
@@ -157,35 +217,68 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        toolbarHeight: 80,
+        toolbarHeight: 160,
         centerTitle: true,
-        title: Row(
-          // mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        title: Column(
           children: [
-            Flexible(
-              flex: 7,
-              // child: FractionallySizedBox(
-              //   widthFactor: 0.90,
-              child: SearchButton(
-                onTap: onTap,
-                locationText: searchResult == null
-                    ? 'Find the cheapest deals'
-                    : searchResult!.address!,
-              ),
-              // ),
+            Row(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  flex: 7,
+                  // child: FractionallySizedBox(
+                  //   widthFactor: 0.90,
+                  child: SearchButton(
+                    iconData: Icons.hail,
+                    onTap: () {
+                      onTap(false);
+                    },
+                    locationText: srcSearchResult == null
+                        ? 'Select your pickup point'
+                        : srcSearchResult!.address!,
+                  ),
+                  // ),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                Flexible(
+                  flex: 1,
+                  child: IconButton(
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      icon: const Icon(Icons.discount),
+                      onPressed: onPressed),
+                )
+              ],
             ),
-            const SizedBox(
-              width: 20,
+            const SizedBox(height: 20),
+            Row(
+              // mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  flex: 7,
+                  // child: FractionallySizedBox(
+                  //   widthFactor: 0.90,
+                  child: SearchButton(
+                    iconData: Icons.location_pin,
+                    onTap: () {
+                      onTap(true);
+                    },
+                    locationText: destSearchResult == null
+                        ? 'Select your destination'
+                        : destSearchResult!.address!,
+                  ),
+                  // ),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                const Spacer(flex: 1),
+              ],
             ),
-            Flexible(
-              flex: 1,
-              child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  icon: const Icon(Icons.discount),
-                  onPressed: onPressed),
-            )
           ],
         ),
       ),
@@ -216,7 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   zoomGesturesEnabled: true,
                   zoomControlsEnabled: true,
                 ),
-                searchResult == null ? const SizedBox.shrink() : ResultCard(),
+                srcSearchResult == null && destSearchResult == null
+                    ? const SizedBox.shrink()
+                    : ResultCard(),
               ],
             );
           } else {
@@ -229,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
-      bottomNavigationBar: searchResult == null
+      bottomNavigationBar: srcSearchResult == null
           ? const SizedBox.shrink()
           : BottomAppBar(
               child: FractionallySizedBox(
