@@ -53,8 +53,10 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
     if (firstQuery) {
       firstQuery = false;
       query = previousSearchResult;
-    } else if (query.isEmpty) {
-      return [];
+    }
+
+    if (query.length < 3 || query.isEmpty) {
+      return Future.value([]);
     }
 
     final results = await flutterGooglePlacesSdk.findAutocompletePredictions(
@@ -102,19 +104,23 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                     onTap: () async {
-                      flutterGooglePlacesSdk
-                          .fetchPlace(
-                        data.placeId,
-                        fields: _placeFields,
-                      )
-                          .then((value) {
-                        Navigator.of(context).pop<Place?>(value.place);
-                      });
+                      try {
+                        flutterGooglePlacesSdk
+                            .fetchPlace(
+                          data.placeId,
+                          fields: _placeFields,
+                        )
+                            .then((value) {
+                          Navigator.of(context).pop<Place?>(value.place);
+                        });
+                      } catch (e) {
+                        Navigator.of(context).pop<Place?>(null);
+                      }
                     });
               },
             );
           } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-            return const Center(child: Text("No results found"));
+            return const Center(child: Text(""));
           }
 
           return const Center(child: CircularProgressIndicator());
@@ -144,6 +150,7 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
           if (query != '') {
             resetSearchField(context);
           } else {
+            // close search and return null
             close(context, null);
           }
         },

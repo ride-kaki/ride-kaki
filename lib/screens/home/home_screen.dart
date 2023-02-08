@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
-    as google_places_sdk;
 import 'package:ride_kaki/cubits/geolocation/geolocation_cubit.dart';
 import 'package:ride_kaki/screens/home/result_card.dart';
+import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
+    as google_places_sdk;
 import 'package:ride_kaki/screens/home/search_button.dart';
+import 'package:ride_kaki/screens/home/search_card.dart';
 import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/places_search_delegate.dart';
 import 'package:ride_kaki/utils/constants.dart';
@@ -34,14 +35,48 @@ class _HomeScreenState extends State<HomeScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  late GoogleMapController newGoogleMapController;
-  late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   google_places_sdk.Place? srcSearchResult;
   google_places_sdk.Place? destSearchResult;
+  late GoogleMapController newGoogleMapController;
 
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
   late PolylinePoints polylinePoints;
+
+  void mapHook(
+    bool isUpdateDest,
+    LatLng? _src,
+    LatLng? _dest,
+  ) {
+    // draw pins
+    drawPin(
+      isUpdateDest ? _dest : _src,
+      isUpdateDest ? 'destinationPin' : 'sourcePin',
+    );
+
+    // draw polylines
+    drawPolylines(
+      _src,
+      _dest,
+    );
+
+    // check if the result selected was null
+    // if both locations are filled in
+    if (_dest != null && _src != null) {
+      // animate to boundary locations
+      mapAnimateToBounds(_src, _dest);
+    }
+    // if the result isn't empty and there is 1 location filled, animate to 1 location
+    else if (_dest == null && _src == null) {
+      //TODO: add animation to geolocation latlng
+      /*LatLng _latLng =*/
+      /*LatLng(state.position.latitude, state.position.longitude);*/
+      /*mapAnimateToTarget(_latLng);*/
+    } else if (_dest == null || _src == null) {
+      // animate to single location
+      mapAnimateToTarget(_src ?? _dest!);
+    }
+  }
 
   void mapAnimateToTarget(LatLng targetLatLng) async {
     CameraPosition cameraPosition =
@@ -72,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
     newGoogleMapController.animateCamera(
       CameraUpdate.newLatLngBounds(
         bounds,
-        10.0,
+        20.0,
       ),
     );
   }
@@ -136,105 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  onPressed() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PromoScreen(),
-      ),
-    );
-  }
-
-  // isUpdateDest is a boolean flag that if is true, denotes that we're updating
-  // the destination, otherwise we're updating the src
-  onTap(bool isUpdateDest) async {
-    google_places_sdk.Place? prevSearchResult =
-        isUpdateDest ? destSearchResult : srcSearchResult;
-
-    google_places_sdk.Place? result =
-        await showSearch<google_places_sdk.Place?>(
-      context: context,
-      delegate: PlacesSearchDelegate(
-        searchFieldPlaceholder: "Search for your location",
-        flutterGooglePlacesSdk: flutterGooglePlacesSdk,
-        previousSearchResult:
-            prevSearchResult == null ? '' : prevSearchResult.address!,
-      ),
-    );
-
-    // set state is async, so we want to animate when the states are done setting
-    // so these are local vars to track states
-    LatLng? _src = srcSearchResult == null
-        ? null
-        : LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
-
-    ;
-    LatLng? _dest = destSearchResult == null
-        ? null
-        : LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
-
-    // update the states and local vars
-    if (isUpdateDest) {
-      _dest = result == null
-          ? null
-          : LatLng(result.latLng!.lat, result.latLng!.lng);
-
-      setState(() {
-        destSearchResult = result;
-      });
-    } else {
-      _src = result == null
-          ? null
-          : LatLng(result.latLng!.lat, result.latLng!.lng);
-      setState(() {
-        srcSearchResult = result;
-      });
-    }
-
-    // draw pins
-    drawPin(
-      isUpdateDest ? _dest : _src,
-      isUpdateDest ? 'destinationPin' : 'sourcePin',
-    );
-
-    // check if the result selected was null
-    if (result != null && result.latLng != null) {
-      // if both locations are filled in
-      if (_dest != null && _src != null) {
-        // draw polylines
-        drawPolylines(
-          _src,
-          _dest,
-        );
-        // animate to boundary locations
-        mapAnimateToBounds(_src, _dest);
-      }
-      // if the result isn't empty and there is 1 location filled, animate to 1 location
-      else if (_dest == null || _src == null) {
-        LatLng _result = LatLng(result.latLng!.lat, result.latLng!.lng);
-
-        drawPolylines(
-          _src,
-          _dest,
-        );
-        // animate to single location
-        mapAnimateToTarget(isUpdateDest ? _dest! : _src!);
-      }
-
-      // initialise markers
-    }
-  }
-
   @override
   initState() {
     super.initState();
-    // initialise GooglePlacesSdk
-    flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
-      gMapsAPIKey,
-      locale: gMapsPlacesLocale,
-    );
-    flutterGooglePlacesSdk.isInitialized().then((value) {
-      debugPrint('Places Initialized: $value');
-    });
     // initialise polylinePoints
     polylinePoints = PolylinePoints();
   }
@@ -242,73 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        toolbarHeight: 160,
-        centerTitle: true,
-        title: Column(
-          children: [
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  flex: 7,
-                  // child: FractionallySizedBox(
-                  //   widthFactor: 0.90,
-                  child: SearchButton(
-                    iconData: Icons.hail,
-                    onTap: () {
-                      onTap(false);
-                    },
-                    locationText: srcSearchResult == null
-                        ? 'Select your pickup point'
-                        : srcSearchResult!.address!,
-                  ),
-                  // ),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: IconButton(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      icon: const Icon(Icons.discount),
-                      onPressed: onPressed),
-                )
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  flex: 7,
-                  // child: FractionallySizedBox(
-                  //   widthFactor: 0.90,
-                  child: SearchButton(
-                    iconData: Icons.location_pin,
-                    onTap: () {
-                      onTap(true);
-                    },
-                    locationText: destSearchResult == null
-                        ? 'Select your destination'
-                        : destSearchResult!.address!,
-                  ),
-                  // ),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                const Spacer(flex: 1),
-              ],
-            ),
-          ],
-        ),
-      ),
       body: BlocBuilder<GeolocationCubit, GeolocationState>(
         builder: (context, state) {
           if (state is GeolocationLoading) {
@@ -321,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 GoogleMap(
                   initialCameraPosition: locationGooglePlex,
                   myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
+                  myLocationButtonEnabled: false,
                   mapType: MapType.normal,
                   onMapCreated: (controller) {
                     _controller.complete(controller);
@@ -331,11 +203,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     mapAnimateToTarget(_latLng);
                   },
                   zoomGesturesEnabled: true,
-                  zoomControlsEnabled: true,
+                  /*zoomControlsEnabled: true,*/
                 ),
-                srcSearchResult == null && destSearchResult == null
-                    ? const SizedBox.shrink()
-                    : ResultCard(),
+                /*srcSearchResult != null && destSearchResult != null*/
+                /*? ResultCard()*/
+                /*: const SizedBox.shrink(),*/
+                SearchCard(
+                  srcSearchResult: srcSearchResult,
+                  destSearchResult: destSearchResult,
+                  updateSrcSearchResult: (result) {
+                    setState(() {
+                      srcSearchResult = result;
+                    });
+                  },
+                  updateDestSearchResult: (result) {
+                    setState(() {
+                      destSearchResult = result;
+                    });
+                  },
+                  mapHook: mapHook,
+                ),
               ],
             );
           } else {
@@ -348,9 +235,8 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
-      bottomNavigationBar: srcSearchResult == null
-          ? const SizedBox.shrink()
-          : BottomAppBar(
+      bottomNavigationBar: srcSearchResult != null && destSearchResult != null
+          ? BottomAppBar(
               child: FractionallySizedBox(
                 widthFactor: 0.8,
                 child: Padding(
@@ -393,7 +279,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-            ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
