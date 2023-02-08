@@ -67,7 +67,7 @@ class _ResultCardState extends State<ResultCard> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.all(
-                      Radius.circular(15),
+                      Radius.circular(100),
                     ),
                     color: Colors.grey.shade300,
                   ),
