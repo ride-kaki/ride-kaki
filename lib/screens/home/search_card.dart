@@ -113,7 +113,7 @@ class _SearchCardState extends State<SearchCard> {
     return DraggableScrollableSheet(
       controller: scrollController,
       initialChildSize: 0.35,
-      minChildSize: 0.20,
+      minChildSize: 0.35,
       maxChildSize: 0.9,
       builder: (context, scrollController) {
         return Container(
@@ -136,7 +136,7 @@ class _SearchCardState extends State<SearchCard> {
             physics: const ClampingScrollPhysics(),
             children: [
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               FractionallySizedBox(
                 widthFactor: 0.10,
