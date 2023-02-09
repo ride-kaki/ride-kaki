@@ -36,8 +36,8 @@ class _ResultCardState extends State<ResultCard> {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       controller: scrollController,
-      initialChildSize: 0.35,
-      minChildSize: 0.20,
+      initialChildSize: 0.33,
+      minChildSize: 0.33,
       maxChildSize: 0.9,
       builder: (context, scrollController) {
         return Container(

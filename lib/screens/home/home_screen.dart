@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   google_places_sdk.Place? srcSearchResult;
   google_places_sdk.Place? destSearchResult;
   late GoogleMapController newGoogleMapController;
+  late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
 
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
@@ -174,6 +175,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   initState() {
     super.initState();
+    // initialise GooglePlacesSdk
+    flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
+      gMapsAPIKey,
+      locale: gMapsPlacesLocale,
+    );
+    flutterGooglePlacesSdk.isInitialized().then((value) {
+      debugPrint('Places Initialized: $value');
+    });
     // initialise polylinePoints
     polylinePoints = PolylinePoints();
   }
@@ -200,6 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     newGoogleMapController = controller;
                     LatLng _latLng = LatLng(
                         state.position.latitude, state.position.longitude);
+                    // use google sdk to search for place.
+                    /*setState(() {srcSearchResult = _latLng});*/
                     mapAnimateToTarget(_latLng);
                   },
                   zoomGesturesEnabled: true,
@@ -208,21 +219,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 /*srcSearchResult != null && destSearchResult != null*/
                 /*? ResultCard()*/
                 /*: const SizedBox.shrink(),*/
-                SearchCard(
-                  srcSearchResult: srcSearchResult,
-                  destSearchResult: destSearchResult,
-                  updateSrcSearchResult: (result) {
-                    setState(() {
-                      srcSearchResult = result;
-                    });
-                  },
-                  updateDestSearchResult: (result) {
-                    setState(() {
-                      destSearchResult = result;
-                    });
-                  },
-                  mapHook: mapHook,
-                ),
+                destSearchResult == null
+                    ? SearchCard(
+                        flutterGooglePlacesSdk: flutterGooglePlacesSdk,
+                        srcSearchResult: srcSearchResult,
+                        destSearchResult: destSearchResult,
+                        updateSrcSearchResult: (result) {
+                          setState(() {
+                            srcSearchResult = result;
+                          });
+                        },
+                        updateDestSearchResult: (result) {
+                          setState(() {
+                            destSearchResult = result;
+                          });
+                        },
+                        mapHook: mapHook,
+                      )
+                    : ResultCard(),
               ],
             );
           } else {

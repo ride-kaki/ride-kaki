@@ -8,6 +8,7 @@ import 'package:ride_kaki/screens/search/places_search_delegate.dart';
 import 'package:ride_kaki/utils/constants.dart';
 
 class SearchCard extends StatefulWidget {
+  google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   google_places_sdk.Place? srcSearchResult;
   google_places_sdk.Place? destSearchResult;
   void Function(google_places_sdk.Place?) updateSrcSearchResult;
@@ -18,6 +19,7 @@ class SearchCard extends StatefulWidget {
 
   SearchCard({
     super.key,
+    required this.flutterGooglePlacesSdk,
     required this.srcSearchResult,
     required this.destSearchResult,
     required this.updateSrcSearchResult,
@@ -30,8 +32,6 @@ class SearchCard extends StatefulWidget {
 }
 
 class _SearchCardState extends State<SearchCard> {
-  late final google_places_sdk.FlutterGooglePlacesSdk flutterGooglePlacesSdk;
-
   DraggableScrollableController scrollController =
       DraggableScrollableController();
 
@@ -54,7 +54,7 @@ class _SearchCardState extends State<SearchCard> {
       context: context,
       delegate: PlacesSearchDelegate(
         searchFieldPlaceholder: "Search for your location",
-        flutterGooglePlacesSdk: flutterGooglePlacesSdk,
+        flutterGooglePlacesSdk: widget.flutterGooglePlacesSdk,
         // TODO: change to full search object with autocomplete details
         previousSearchResult:
             prevSearchResult == null ? '' : prevSearchResult.address!,
@@ -97,15 +97,6 @@ class _SearchCardState extends State<SearchCard> {
   @override
   initState() {
     super.initState();
-    // initialise GooglePlacesSdk
-    flutterGooglePlacesSdk = google_places_sdk.FlutterGooglePlacesSdk(
-      gMapsAPIKey,
-      locale: gMapsPlacesLocale,
-    );
-    flutterGooglePlacesSdk.isInitialized().then((value) {
-      debugPrint('Places Initialized: $value');
-    });
-    // initialise polylinePoints
   }
 
   @override
