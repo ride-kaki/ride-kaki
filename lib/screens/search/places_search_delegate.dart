@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
+import 'package:ride_kaki/utils/gmaps_functions.dart';
 
 class PlacesSearchDelegate extends SearchDelegate<Place?> {
   PlacesSearchDelegate({
@@ -38,37 +39,30 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
   String previousSearchResult;
   bool firstQuery = true;
 
+  Future<List<AutocompletePrediction>> _searchPlaces(
+    BuildContext context,
+    String query,
+  ) async {
+    if (firstQuery) {
+      firstQuery = false;
+      query = previousSearchResult;
+    }
+    // searchPlaces
+
+    return searchPlaces(
+      context,
+      query,
+      flutterGooglePlacesSdk,
+    );
+  }
+
   resetSearchField(BuildContext context) async {
     // clear query field
     query = '';
     // reset results
     /*placesPredictionList = searchPlaces(context, query);*/
-    placesPredictionList = searchPlaces(context, query);
+    placesPredictionList = _searchPlaces(context, query);
     showSuggestions(context);
-  }
-
-  // making api call for search
-  Future<List<AutocompletePrediction>> searchPlaces(
-      BuildContext context, String query) async {
-    if (firstQuery) {
-      firstQuery = false;
-      query = previousSearchResult;
-    }
-
-    if (query.length < 3 || query.isEmpty) {
-      return Future.value([]);
-    }
-
-    final results = await flutterGooglePlacesSdk.findAutocompletePredictions(
-      query,
-      countries: ['sg'],
-      newSessionToken: false,
-      /*origin: LatLng(lat: 43.12, lng: 95.20),*/
-      /*locationBias: _locationBiasEnabled ? _locationBias : null,*/
-      /*locationRestriction: LatLngBounds()*/
-    );
-    return results.predictions;
-    // actual search method
   }
 
   // building widget
@@ -158,13 +152,13 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    placesPredictionList = searchPlaces(context, query);
+    placesPredictionList = _searchPlaces(context, query);
     return buildResultsAndSuggestions(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    placesPredictionList = searchPlaces(context, query);
+    placesPredictionList = _searchPlaces(context, query);
     return buildResultsAndSuggestions(context);
   }
 }
