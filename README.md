@@ -1,4 +1,5 @@
 # Ride Kaki
+Ride Kaki is a mobile application that automatically searches and compares pricing between different ride sharing services for you desired pickup and drop-off points, saving you both time and money
 
 ## Testing Supabase Functions Locally
 
