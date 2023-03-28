@@ -176,6 +176,7 @@ class _SearchCardState extends State<SearchCard> {
                           // child: FractionallySizedBox(
                           //   widthFactor: 0.90,
                           child: SearchButton(
+                            key: const Key("searchBar"),
                             onTap: () {
                               onTap(true);
                             },
