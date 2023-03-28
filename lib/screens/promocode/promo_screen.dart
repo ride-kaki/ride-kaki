@@ -18,33 +18,15 @@ class _PromoScreenState extends State<PromoScreen> {
       ),
       body: ListView(
         children: [
-          SimpleShadow(offset: Offset(0, 0), child: Center(child: PromoCard())),
-          SimpleShadow(offset: Offset(0, 0), child: Center(child: PromoCard())),
-          SimpleShadow(offset: Offset(0, 0), child: Center(child: PromoCard()))
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample1(),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample1(),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample1(),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample1(),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample1(),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: HorizontalCouponExample2(),
-          // )
+          SimpleShadow(
+              offset: const Offset(0, 0),
+              child: Center(
+                  child: PromoCard(
+                promoDetails: "\$2 Off",
+                promoCode: "CNY2020",
+                lastRedemptionDate: DateTime.now().toString().substring(0, 10),
+                imageString: "/assets/images/grab.png",
+              )))
         ],
       ),
     );

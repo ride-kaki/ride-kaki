@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class PromoCard extends StatelessWidget {
-  const PromoCard({Key? key}) : super(key: key);
+  const PromoCard(
+      {super.key,
+      this.promoDetails,
+      this.promoCode,
+      this.lastRedemptionDate,
+      this.imageString});
 
+  final String? promoDetails;
+  final String? promoCode;
+  final String? lastRedemptionDate;
+  final String? imageString;
   @override
   Widget build(BuildContext context) {
     const String promoCardName = "assets/images/vecs.svg";
@@ -19,10 +28,8 @@ class PromoCard extends StatelessWidget {
             top: 25,
             left: 45,
             child: SizedBox(
-                height: 60,
-                width: 60,
-                child: Image.asset('assets/images/grab.png'))),
-        Positioned(bottom: 30, left: 45, child: Text("\$2 Off")),
+                height: 60, width: 60, child: Image.asset(imageString ?? ""))),
+        Positioned(bottom: 30, left: 45, child: Text(promoDetails ?? "")),
         Positioned(
             top: 20,
             left: 157,
@@ -33,7 +40,7 @@ class PromoCard extends StatelessWidget {
         Positioned(
             top: 50,
             left: 157,
-            child: Text("CNY2020", style: TextStyle(fontSize: 30))),
+            child: Text(promoCode ?? "", style: TextStyle(fontSize: 30))),
         Positioned(
             top: 86,
             left: 158,
@@ -48,7 +55,7 @@ class PromoCard extends StatelessWidget {
         Positioned(
             top: 109,
             left: 187,
-            child: Text(DateTime.now().toString().substring(0, 10))),
+            child: Text(lastRedemptionDate ?? "")),
       ],
     );
   }
