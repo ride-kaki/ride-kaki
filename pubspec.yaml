@@ -58,12 +58,15 @@ dependencies:
   flutter_svg: ^2.0.0+1
   drop_shadow: ^0.0.2+1
   simple_shadow: ^0.3.1
+  plugin_platform_interface: ^2.1.4
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   network_image_mock: ^2.0.1
+  geolocator: ^9.0.2
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
