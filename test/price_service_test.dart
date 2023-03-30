@@ -35,7 +35,6 @@ void main() {
     PriceResult result =
         await PriceService.getPrices(MockBuildContext(), wayPoints);
 
-    //Assert
     expect(result.toJson(), priceResult.toJson());
   });
 }

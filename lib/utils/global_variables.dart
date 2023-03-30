@@ -1,6 +1,4 @@
 const String uri = String.fromEnvironment(
-  'GO_HOST',
-  defaultValue: 'http://localhost:8080',
+  'SPRINGBOOT_HOST',
+  defaultValue: 'https://ride-kaki.et.r.appspot.com',
 );
-
-//https://ride-kaki.et.r.appspot.com

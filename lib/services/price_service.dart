@@ -24,6 +24,7 @@ class PriceService {
       priceResult = PriceResult.fromJson(jsonDecode(res.body));
     } catch (e) {
       print(e);
+
     }
 
     return priceResult;

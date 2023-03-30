@@ -4,7 +4,7 @@ import 'package:ride_kaki/utils/formats.dart';
 class ResultCardItem extends StatelessWidget {
   String company;
   String location;
-  String logoUrl;
+  String logoPath;
   double price;
   int index;
   bool isSelected;
@@ -16,7 +16,7 @@ class ResultCardItem extends StatelessWidget {
     required this.company,
     required this.location,
     required this.price,
-    required this.logoUrl,
+    required this.logoPath,
     required this.onTap,
     required this.index,
     required this.isSelected,
@@ -43,8 +43,8 @@ class ResultCardItem extends StatelessWidget {
           child: SizedBox(
             height: 50,
             width: 50,
-            child: Image.network(
-              "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg",
+            child: Image.asset(
+              logoPath,
             ),
           ),
         ),

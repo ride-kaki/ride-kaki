@@ -13,8 +13,7 @@ class ResultCard extends StatefulWidget {
 class _ResultCardState extends State<ResultCard> {
   static const String company = "JustGrab";
   static const String location = "Lazada Building Exit B";
-  static const String logoUrl =
-      "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg";
+  static const String logoPath = "assets/images/gojek.png";
   static const double price = 16.69;
 
   int selectedIndex = -1;
@@ -88,7 +87,7 @@ class _ResultCardState extends State<ResultCard> {
                     company: company,
                     location: location,
                     price: price,
-                    logoUrl: logoUrl,
+                    logoPath: logoPath,
                     index: index,
                     isSelected: index == selectedIndex,
                     onTap: onTap,
