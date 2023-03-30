@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -167,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
       markers.add(
         Marker(
           markerId: MarkerId(id),
-          position: latLng!,
+          position: latLng,
         ),
       );
     }
@@ -201,8 +200,6 @@ class _HomeScreenState extends State<HomeScreen> {
             return Stack(
               children: [
                 GoogleMap(
-                  markers: markers,
-                  polylines: polylines,
                   initialCameraPosition: locationGooglePlex,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
