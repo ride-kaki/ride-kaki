@@ -59,6 +59,9 @@ dependencies:
   drop_shadow: ^0.0.2+1
   simple_shadow: ^0.3.1
   plugin_platform_interface: ^2.1.4
+  # json 
+  json_annotation: ^4.6.0
+  http: ^0.13.5
 
 
 dev_dependencies:
@@ -74,6 +77,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  build_runner: ^2.3.3
+  json_serializable: ^6.3.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
