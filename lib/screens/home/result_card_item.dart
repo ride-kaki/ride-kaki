@@ -43,8 +43,8 @@ class ResultCardItem extends StatelessWidget {
           child: SizedBox(
             height: 50,
             width: 50,
-            child: Image.asset(
-              "assets/images/grab.png",
+            child: Image.network(
+              "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg",
             ),
           ),
         ),
