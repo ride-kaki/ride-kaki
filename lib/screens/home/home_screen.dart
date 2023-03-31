@@ -204,6 +204,56 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void updateSrcDest(bool isUpdateDest) async {
+    google_places_sdk.Place? prevSearchResult =
+        isUpdateDest ? destSearchResult : srcSearchResult;
+
+    google_places_sdk.Place? result =
+        await showSearch<google_places_sdk.Place?>(
+      context: context,
+      delegate: PlacesSearchDelegate(
+        searchFieldPlaceholder: "Search for your location",
+        flutterGooglePlacesSdk: flutterGooglePlacesSdk,
+        previousSearchResult:
+            prevSearchResult == null ? '' : prevSearchResult.address!,
+      ),
+    );
+
+    // set state is async, so we want to animate when the states are done setting
+    // so these are local vars to track states
+    LatLng? _src = srcSearchResult == null
+        ? null
+        : LatLng(srcSearchResult!.latLng!.lat, srcSearchResult!.latLng!.lng);
+
+    LatLng? _dest = destSearchResult == null
+        ? null
+        : LatLng(destSearchResult!.latLng!.lat, destSearchResult!.latLng!.lng);
+
+    // update the states and local vars
+    if (isUpdateDest) {
+      _dest = result == null
+          ? null
+          : LatLng(result.latLng!.lat, result.latLng!.lng);
+
+      setState(() {
+        destSearchResult = result;
+      });
+    } else {
+      _src = result == null
+          ? null
+          : LatLng(result.latLng!.lat, result.latLng!.lng);
+      setState(() {
+        srcSearchResult = result;
+      });
+    }
+
+    mapHook(
+      isUpdateDest,
+      _src,
+      _dest,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -349,14 +399,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                             children: [
                                               Expanded(
                                                 flex: 3,
-                                                child: Text(
-                                                  srcSearchResult == null
-                                                      ? ''
-                                                      : srcSearchResult!
-                                                          .address!,
-                                                  maxLines: 1,
-                                                  softWrap: false,
-                                                  overflow: TextOverflow.clip,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    updateSrcDest(false);
+                                                  },
+                                                  child: Text(
+                                                    srcSearchResult == null
+                                                        ? ''
+                                                        : srcSearchResult!
+                                                            .address!,
+                                                    maxLines: 1,
+                                                    softWrap: false,
+                                                    overflow: TextOverflow.clip,
+                                                  ),
                                                 ),
                                               ),
                                               Expanded(
@@ -368,14 +423,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                               Expanded(
                                                 flex: 3,
-                                                child: Text(
-                                                  destSearchResult == null
-                                                      ? ''
-                                                      : destSearchResult!
-                                                          .address!,
-                                                  maxLines: 1,
-                                                  softWrap: false,
-                                                  overflow: TextOverflow.clip,
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    updateSrcDest(true);
+                                                  },
+                                                  child: Text(
+                                                    destSearchResult == null
+                                                        ? ''
+                                                        : destSearchResult!
+                                                            .address!,
+                                                    maxLines: 1,
+                                                    softWrap: false,
+                                                    overflow: TextOverflow.clip,
+                                                  ),
                                                 ),
                                               ),
                                             ],

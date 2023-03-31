@@ -55,7 +55,6 @@ class _SearchCardState extends State<SearchCard> {
       delegate: PlacesSearchDelegate(
         searchFieldPlaceholder: "Search for your location",
         flutterGooglePlacesSdk: widget.flutterGooglePlacesSdk,
-        // TODO: change to full search object with autocomplete details
         previousSearchResult:
             prevSearchResult == null ? '' : prevSearchResult.address!,
       ),
@@ -176,28 +175,13 @@ class _SearchCardState extends State<SearchCard> {
                           // child: FractionallySizedBox(
                           //   widthFactor: 0.90,
                           child: SearchButton(
-                            key: const Key("searchBar"),
-                            onTap: () {
-                              onTap(widget.srcSearchResult != null);
-                            },
-                            locationText: widget.destSearchResult == null
-                                ? 'Where are you heading?'
-                                : widget.destSearchResult!.address!,
-                          ),
+                              key: const Key("searchBar"),
+                              onTap: () {
+                                onTap(widget.srcSearchResult != null);
+                              },
+                              locationText: 'Where are you heading?'),
                           // ),
                         ),
-                        /*const SizedBox(*/
-                        /*width: 20,*/
-                        /*),*/
-                        /*Flexible(*/
-                        /*flex: 1,*/
-                        /*child: IconButton(*/
-                        /*splashColor: Colors.transparent,*/
-                        /*highlightColor: Colors.transparent,*/
-                        /*icon: const Icon(Icons.discount),*/
-                        /*onPressed: onPressed,*/
-                        /*),*/
-                        /*)*/
                       ],
                     ),
                     const SizedBox(
