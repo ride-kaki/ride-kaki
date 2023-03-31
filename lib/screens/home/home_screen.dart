@@ -236,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         mapHook: mapHook,
                       )
-                    : ResultCard(),
+                    : ResultCard(srcSearchResult: const google_places_sdk.Place(latLng: google_places_sdk.LatLng(lat: 1.2980229946399664, lng: 103.848999268477)), destSearchResult: destSearchResult!),
               ],
             );
           } else {
