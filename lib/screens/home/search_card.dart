@@ -178,7 +178,7 @@ class _SearchCardState extends State<SearchCard> {
                           child: SearchButton(
                             key: const Key("searchBar"),
                             onTap: () {
-                              onTap(true);
+                              onTap(widget.srcSearchResult != null);
                             },
                             locationText: widget.destSearchResult == null
                                 ? 'Where are you heading?'

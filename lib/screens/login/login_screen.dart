@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ride_kaki/screens/home/home_screen.dart';
 import 'package:ride_kaki/supabase/snackbar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -54,7 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
       final session = data.session;
       if (session != null) {
         _redirecting = true;
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushAndRemoveUntil(
+          HomeScreen.route(),
+          (_) => false,
+        );
       }
     });
     super.initState();

@@ -14,26 +14,6 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
           ),
         );
 
-  static final List<PlaceField> _placeFields = [
-    PlaceField.Address,
-    PlaceField.AddressComponents,
-    PlaceField.BusinessStatus,
-    PlaceField.Id,
-    PlaceField.Location,
-    PlaceField.Name,
-    PlaceField.OpeningHours,
-    PlaceField.PhoneNumber,
-    PlaceField.PhotoMetadatas,
-    PlaceField.PlusCode,
-    PlaceField.PriceLevel,
-    PlaceField.Rating,
-    PlaceField.Types,
-    PlaceField.UserRatingsTotal,
-    PlaceField.UTCOffset,
-    PlaceField.Viewport,
-    PlaceField.WebsiteUri,
-  ];
-
   late Future<List<AutocompletePrediction>> placesPredictionList;
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
   String previousSearchResult;
@@ -102,7 +82,7 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
                         flutterGooglePlacesSdk
                             .fetchPlace(
                           data.placeId,
-                          fields: _placeFields,
+                          fields: placeFields,
                         )
                             .then((value) {
                           Navigator.of(context).pop<Place?>(value.place);

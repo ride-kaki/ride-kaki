@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_kaki/cubits/geolocation/geolocation_cubit.dart';
+import 'package:ride_kaki/cubits/supabase/history_cubit.dart';
 import 'package:ride_kaki/screens/home/result_card.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
     as google_places_sdk;
@@ -13,6 +14,7 @@ import 'package:ride_kaki/screens/home/search_card.dart';
 import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/places_search_delegate.dart';
 import 'package:ride_kaki/utils/constants.dart';
+import 'package:ride_kaki/utils/gmaps_functions.dart';
 import 'package:ride_kaki/utils/locations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,8 +22,14 @@ class HomeScreen extends StatefulWidget {
 
   static Route<void> route() {
     return MaterialPageRoute(
-      builder: (context) => BlocProvider<GeolocationCubit>(
-        create: (context) => GeolocationCubit()..requestPosition(context),
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider<GeolocationCubit>(
+              create: (context) =>
+                  GeolocationCubit()..requestPosition(context)),
+          BlocProvider<HistoryCubit>(
+              create: (context) => HistoryCubit()..initializeHistory()),
+        ],
         child: const HomeScreen(),
       ),
     );
@@ -187,68 +195,213 @@ class _HomeScreenState extends State<HomeScreen> {
     polylinePoints = PolylinePoints();
   }
 
+  void onClearButtonPressed() {
+    setState(() {
+      srcSearchResult = null;
+      destSearchResult = null;
+      markers = {};
+      polylines = {};
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<GeolocationCubit, GeolocationState>(
-        builder: (context, state) {
-          if (state is GeolocationLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is GeolocationLoaded) {
-            return Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: locationGooglePlex,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  mapType: MapType.normal,
-                  onMapCreated: (controller) {
-                    _controller.complete(controller);
-                    newGoogleMapController = controller;
-                    LatLng _latLng = LatLng(
-                        state.position.latitude, state.position.longitude);
-                    // use google sdk to search for place.
-                    /*setState(() {srcSearchResult = _latLng});*/
-                    mapAnimateToTarget(_latLng);
-                  },
-                  zoomGesturesEnabled: true,
-                  /*zoomControlsEnabled: true,*/
+      body: BlocBuilder<HistoryCubit, HistoryState>(builder: (context, state) {
+        return BlocBuilder<GeolocationCubit, GeolocationState>(
+          builder: (context, state) {
+            if (state is GeolocationLoading) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is GeolocationLoaded) {
+              return Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Stack(
+                    children: [
+                      GoogleMap(
+                        initialCameraPosition: locationGooglePlex,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        mapType: MapType.normal,
+                        polylines: polylines,
+                        onMapCreated: (controller) {
+                          _controller.complete(controller);
+                          newGoogleMapController = controller;
+                          LatLng _latLng = LatLng(state.position.latitude,
+                              state.position.longitude);
+                          searchPlacesWithLatLng(state.position.latitude,
+                                  state.position.longitude)
+                              .then((value) => {
+                                    searchPlaces(context, value!,
+                                            flutterGooglePlacesSdk)
+                                        .then((places) => {
+                                              flutterGooglePlacesSdk
+                                                  .fetchPlace(
+                                                    places[0].placeId,
+                                                    fields: placeFields,
+                                                  )
+                                                  .then((place) => {
+                                                        setState(() {
+                                                          srcSearchResult =
+                                                              place.place;
+                                                          mapHook(
+                                                              false,
+                                                              LatLng(
+                                                                  place
+                                                                      .place!
+                                                                      .latLng!
+                                                                      .lat,
+                                                                  place
+                                                                      .place!
+                                                                      .latLng!
+                                                                      .lng),
+                                                              null);
+                                                        })
+                                                      })
+                                            })
+                                  });
+                          // use google sdk to search for place.
+                          /*setState(() {srcSearchResult = _latLng});*/
+                          mapAnimateToTarget(_latLng);
+                        },
+                        zoomGesturesEnabled: true,
+                        markers: markers,
+                      ),
+                      destSearchResult == null
+                          ? SearchCard(
+                              flutterGooglePlacesSdk: flutterGooglePlacesSdk,
+                              srcSearchResult: srcSearchResult,
+                              destSearchResult: destSearchResult,
+                              updateSrcSearchResult: (result) {
+                                setState(() {
+                                  srcSearchResult = result;
+                                });
+                              },
+                              updateDestSearchResult: (result) {
+                                setState(() {
+                                  destSearchResult = result;
+                                });
+                              },
+                              mapHook: mapHook,
+                            )
+                          : ResultCard(
+                              //srcSearchResult: const google_places_sdk.Place(
+                              //latLng: google_places_sdk.LatLng(
+                              //lat: 1.2980229946399664,
+                              //lng: 103.848999268477)),
+                              srcSearchResult: srcSearchResult!,
+                              destSearchResult: destSearchResult!),
+                    ],
+                  ),
+                  srcSearchResult == null || destSearchResult == null
+                      ? SizedBox.shrink()
+                      : Column(
+                          children: [
+                            SizedBox(
+                              height: 50,
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: 0.9,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  RawMaterialButton(
+                                    onPressed: onClearButtonPressed,
+                                    elevation: 2.0,
+                                    fillColor: Colors.white,
+                                    child: Icon(
+                                      Icons.navigate_before,
+                                      color: Colors.grey,
+                                      size: 30.0,
+                                    ),
+                                    padding: EdgeInsets.all(8.0),
+                                    shape: CircleBorder(),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 5,
+                                            blurRadius: 7,
+                                            offset: Offset(0,
+                                                3), // changes position of shadow
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(10),
+                                        ),
+                                        color: Colors.white,
+                                      ),
+                                      child: SizedBox(
+                                        height: 50,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 20,
+                                            right: 20,
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Expanded(
+                                                flex: 3,
+                                                child: Text(
+                                                  srcSearchResult == null
+                                                      ? ''
+                                                      : srcSearchResult!
+                                                          .address!,
+                                                  maxLines: 1,
+                                                  softWrap: false,
+                                                  overflow: TextOverflow.clip,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 1,
+                                                child: Icon(
+                                                  Icons.arrow_forward,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 3,
+                                                child: Text(
+                                                  destSearchResult == null
+                                                      ? ''
+                                                      : destSearchResult!
+                                                          .address!,
+                                                  maxLines: 1,
+                                                  softWrap: false,
+                                                  overflow: TextOverflow.clip,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                ],
+              );
+            } else {
+              // show overlay to ask they to input location they with to use
+              return const Center(
+                child: AlertDialog(
+                  title: Text("You have disabled your location"),
                 ),
-                /*srcSearchResult != null && destSearchResult != null*/
-                /*? ResultCard()*/
-                /*: const SizedBox.shrink(),*/
-                destSearchResult == null
-                    ? SearchCard(
-                        flutterGooglePlacesSdk: flutterGooglePlacesSdk,
-                        srcSearchResult: srcSearchResult,
-                        destSearchResult: destSearchResult,
-                        updateSrcSearchResult: (result) {
-                          setState(() {
-                            srcSearchResult = result;
-                          });
-                        },
-                        updateDestSearchResult: (result) {
-                          setState(() {
-                            destSearchResult = result;
-                          });
-                        },
-                        mapHook: mapHook,
-                      )
-                    : ResultCard(srcSearchResult: const google_places_sdk.Place(latLng: google_places_sdk.LatLng(lat: 1.2980229946399664, lng: 103.848999268477)), destSearchResult: destSearchResult!),
-              ],
-            );
-          } else {
-            // show overlay to ask they to input location they with to use
-            return const Center(
-              child: AlertDialog(
-                title: Text("You have disabled your location"),
-              ),
-            );
-          }
-        },
-      ),
+              );
+            }
+          },
+        );
+      }),
       bottomNavigationBar: srcSearchResult != null && destSearchResult != null
           ? BottomAppBar(
               child: FractionallySizedBox(
