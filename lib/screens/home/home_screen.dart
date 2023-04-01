@@ -220,6 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
+    result ??= isUpdateDest ? destSearchResult : srcSearchResult;
+
     // set state is async, so we want to animate when the states are done setting
     // so these are local vars to track states
     LatLng? _src = srcSearchResult == null
