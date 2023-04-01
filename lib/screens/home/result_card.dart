@@ -116,11 +116,6 @@ class _ResultCardState extends State<ResultCard> {
     });
   }
   
-  void toggleSeater() {
-    setState(() {
-      is4Seater = is4Seater == true ? false : true;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +172,7 @@ class _ResultCardState extends State<ResultCard> {
                   direction: vertical ? Axis.vertical : Axis.horizontal,
                   onPressed: (int index) {
                     setState(() {
-                      toggleSeater();
+                      is4Seater = index == 0 ? true : false;
                       for (var i = 0; i < _selectedSeat.length; i++) {
                         _selectedSeat[i] = i == index; 
                       }
