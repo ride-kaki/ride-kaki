@@ -8,6 +8,7 @@ import 'package:ride_kaki/utils/formats.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
     as google_places_sdk;
 
+
 class ResultCard extends StatefulWidget {
   // TODO: add parameter for List of Rides
   // String? company = "JustGrab";
@@ -27,9 +28,12 @@ class ResultCard extends StatefulWidget {
 }
 
 class _ResultCardState extends State<ResultCard> {
-  List<Result> results = [];
-
+  List<Result> results4 = [];
+  List<Result> results6 = [];
+  bool is4Seater = true;
   int selectedIndex = -1;
+  bool vertical = false;
+  final List<bool> _selectedSeat = <bool>[true, false];
 
   DraggableScrollableController scrollController =
       DraggableScrollableController();
@@ -51,7 +55,19 @@ class _ResultCardState extends State<ResultCard> {
                     widget.destSearchResult.latLng!.lng.toString()))
         .then((value) {
       setState(() {
-        results = value;
+        List<Result> res4 = [];
+        List<Result> res6 = [];
+
+        for (var item in value) {
+          if (item.rideName!.split(" ")[item.rideName!.split(" ").length - 1] ==
+              "4") {
+            res4.add(item);
+          } else {
+            res6.add(item);
+          }
+        }
+        results4 = res4;
+        results6 = res6;
       });
     });
   }
@@ -73,7 +89,19 @@ class _ResultCardState extends State<ResultCard> {
                     widget.destSearchResult.latLng!.lng.toString()))
         .then((value) {
       setState(() {
-        results = value;
+        List<Result> res4 = [];
+        List<Result> res6 = [];
+
+        for (var item in value) {
+          if (item.rideName!.split(" ")[item.rideName!.split(" ").length - 1] ==
+              "4") {
+            res4.add(item);
+          } else {
+            res6.add(item);
+          }
+        }
+        results4 = res4;
+        results6 = res6;
       });
     });
   }
@@ -87,10 +115,17 @@ class _ResultCardState extends State<ResultCard> {
       selectedIndex = newIndex;
     });
   }
+  
+  void toggleSeater() {
+    setState(() {
+      is4Seater = is4Seater == true ? false : true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    results.sort(((a, b) => a.price!.compareTo(b.price!)));
+    results4.sort(((a, b) => a.price!.compareTo(b.price!)));
+    results6.sort(((a, b) => a.price!.compareTo(b.price!)));
 
     return DraggableScrollableSheet(
       controller: scrollController,
@@ -137,30 +172,64 @@ class _ResultCardState extends State<ResultCard> {
               const SizedBox(
                 height: 10,
               ),
+              Center(
+                child: ToggleButtons(
+                  direction: vertical ? Axis.vertical : Axis.horizontal,
+                  onPressed: (int index) {
+                    setState(() {
+                      toggleSeater();
+                      for (var i = 0; i < _selectedSeat.length; i++) {
+                        _selectedSeat[i] = i == index; 
+                      }
+                    });
+                  },
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  selectedBorderColor: Colors.green[700],
+                  selectedColor: Colors.white,
+                  fillColor: Colors.green[200],
+                  color: Colors.green[400],
+                  constraints: const BoxConstraints(
+                    minHeight: 40.0,
+                    minWidth: 140,
+                  ),
+                  isSelected: _selectedSeat,
+                  children: const <Widget>[Text("4 Seater"), Text("6 Seater")]
+                ),
+              ),
+              is4Seater ?
               ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: results.length,
+                itemCount: results4.length,
                 itemBuilder: (context, index) {
-                  // String logoPath = "";
-                  // if (results[index].rideName!.split(" ")[0] == "TADA") {
-                  //   logoPath = "assets/images/tada.png";
-                  // } else if (results[index].rideName!.split(" ")[0] ==
-                  //     "Gojek") {
-                  //   logoPath = "assets/images/gojek.png";
-                  // }
                   return ResultCardItem(
-                    company: results[index].rideName!,
+                    company: results4[index].rideName!,
                     location: widget.destSearchResult.address!,
-                    price: results[index].price!,
+                    price: results4[index].price!,
                     logoPath:
-                        "assets/images/${results[index].rideName!.split(" ")[0].toLowerCase()}.png",
+                        "assets/images/${results4[index].rideName!.split(" ")[0].toLowerCase()}.png",
                     index: index,
                     isSelected: index == selectedIndex,
                     onTap: onTap,
                   );
                 },
-              ),
+              ) : ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: results6.length,
+                itemBuilder: (context, index) {
+                  return ResultCardItem(
+                    company: results6[index].rideName!,
+                    location: widget.destSearchResult.address!,
+                    price: results6[index].price!,
+                    logoPath:
+                        "assets/images/${results6[index].rideName!.split(" ")[0].toLowerCase()}.png",
+                    index: index,
+                    isSelected: index == selectedIndex,
+                    onTap: onTap,
+                  );
+                },
+              ) 
             ],
           ),
         );
