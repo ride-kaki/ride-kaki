@@ -37,7 +37,7 @@ class HistoryCubit extends Cubit<HistoryState> {
         });
   }
 
-  void addHistory(History history) async {
-    supabase.from(table).insert(history.toJson());
+  Future<List<dynamic>> addHistory(History history) async {
+    return supabase.from(table).insert(history.toJson()).select();
   }
 }

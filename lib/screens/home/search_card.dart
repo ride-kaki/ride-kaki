@@ -39,8 +39,6 @@ class _SearchCardState extends State<SearchCard> {
   DraggableScrollableController scrollController =
       DraggableScrollableController();
 
-  
-
   // isUpdateDest is a boolean flag that if is true, denotes that we're updating
   // the destination, otherwise we're updating the src
   onTap(bool isUpdateDest, String? address) async {
@@ -67,7 +65,7 @@ class _SearchCardState extends State<SearchCard> {
         userId: supabase.auth.currentUser!.id,
         search: result.address!,
       );
-      context.read<HistoryCubit>().addHistory(h);
+      await context.read<HistoryCubit>().addHistory(h);
     }
 
     // set state is async, so we want to animate when the states are done setting
