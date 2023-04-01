@@ -56,6 +56,28 @@ class _ResultCardState extends State<ResultCard> {
     });
   }
 
+  //This helps to update the price when src/dest changes
+  @override
+  void didUpdateWidget(covariant ResultCard oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    PriceService.getResults(
+            context,
+            WayPoints(
+                starting_latitude:
+                    widget.srcSearchResult.latLng!.lat.toString(),
+                starting_longitude:
+                    widget.srcSearchResult.latLng!.lng.toString(),
+                ending_latitude: widget.destSearchResult.latLng!.lat.toString(),
+                ending_longitude:
+                    widget.destSearchResult.latLng!.lng.toString()))
+        .then((value) {
+      setState(() {
+        results = value;
+      });
+    });
+  }
+
   void onTap(int index) {
     int newIndex = index;
     if (index == selectedIndex) {
@@ -120,18 +142,19 @@ class _ResultCardState extends State<ResultCard> {
                 shrinkWrap: true,
                 itemCount: results.length,
                 itemBuilder: (context, index) {
-                  String logoPath = "";
-                  if (results[index].rideName!.split(" ")[0] == "TADA") {
-                    logoPath = "assets/images/tada.png";
-                  } else if (results[index].rideName!.split(" ")[0] ==
-                      "Gojek") {
-                    logoPath = "assets/images/gojek.png";
-                  }
+                  // String logoPath = "";
+                  // if (results[index].rideName!.split(" ")[0] == "TADA") {
+                  //   logoPath = "assets/images/tada.png";
+                  // } else if (results[index].rideName!.split(" ")[0] ==
+                  //     "Gojek") {
+                  //   logoPath = "assets/images/gojek.png";
+                  // }
                   return ResultCardItem(
                     company: results[index].rideName!,
                     location: widget.destSearchResult.address!,
                     price: results[index].price!,
-                    logoPath: logoPath,
+                    logoPath:
+                        "assets/images/${results[index].rideName!.split(" ")[0].toLowerCase()}.png",
                     index: index,
                     isSelected: index == selectedIndex,
                     onTap: onTap,

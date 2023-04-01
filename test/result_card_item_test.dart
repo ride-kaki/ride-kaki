@@ -13,8 +13,7 @@ import 'package:network_image_mock/network_image_mock.dart';
 void main() async {
   const String company = "JustGrab";
   const String location = "Lazada Building Exit B";
-  const String logoUrl =
-      "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg";
+  const String logoPath = "assets/images/gojek.png";
   const double price = 16.69;
 
   testWidgets("ResultCardItem displays correct information",
@@ -27,20 +26,17 @@ void main() async {
                   company: company,
                   location: location,
                   price: price,
-                  logoUrl: logoUrl,
+                  logoPath: logoPath,
                   onTap: (i) {},
                   index: 0,
                   isSelected: false))));
-                  
 
       //Execute test
 
       //check outputs
       expect(find.text("JustGrab"), findsOneWidget);
       expect(find.text("Lazada Building Exit B"), findsOneWidget);
-      expect(
-          find.image(const NetworkImage(
-              "https://assets.grab.com/wp-content/uploads/sites/4/2021/04/15151634/Grab_Logo_2021.jpg")),
+      expect(find.image(const AssetImage("assets/images/gojek.png")),
           findsOneWidget);
       expect(find.text("S\$16.69"), findsOneWidget);
     });
@@ -58,7 +54,7 @@ void main() async {
                 company: company,
                 location: location,
                 price: price,
-                logoUrl: logoUrl,
+                logoPath: logoPath,
                 onTap: (i) {
                   idx = 1;
                 },
