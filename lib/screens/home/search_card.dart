@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_kaki/cubits/supabase/history_cubit.dart';
+import 'package:ride_kaki/models/history.dart';
 import 'package:ride_kaki/screens/home/search_button.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart'
     as google_places_sdk;
 import 'package:ride_kaki/screens/promocode/promo_screen.dart';
 import 'package:ride_kaki/screens/search/places_search_delegate.dart';
+import 'package:ride_kaki/supabase/snackbar.dart';
 import 'package:ride_kaki/utils/constants.dart';
 
 class SearchCard extends StatefulWidget {
@@ -15,7 +19,7 @@ class SearchCard extends StatefulWidget {
   void Function(google_places_sdk.Place?) updateDestSearchResult;
   void Function(bool, LatLng?, LatLng?) mapHook;
 
-  static String username = "Sophia";
+  String username = "Sophia";
 
   SearchCard({
     super.key,
@@ -45,9 +49,14 @@ class _SearchCardState extends State<SearchCard> {
 
   // isUpdateDest is a boolean flag that if is true, denotes that we're updating
   // the destination, otherwise we're updating the src
-  onTap(bool isUpdateDest) async {
+  onTap(bool isUpdateDest, String? address) async {
     google_places_sdk.Place? prevSearchResult =
         isUpdateDest ? widget.destSearchResult : widget.srcSearchResult;
+
+    String prevSearchResultStr = address ?? "";
+    if (address == null) {
+      address = prevSearchResult == null ? "" : prevSearchResult!.address;
+    }
 
     google_places_sdk.Place? result =
         await showSearch<google_places_sdk.Place?>(
@@ -55,10 +64,17 @@ class _SearchCardState extends State<SearchCard> {
       delegate: PlacesSearchDelegate(
         searchFieldPlaceholder: "Search for your location",
         flutterGooglePlacesSdk: widget.flutterGooglePlacesSdk,
-        previousSearchResult:
-            prevSearchResult == null ? '' : prevSearchResult.address!,
+        previousSearchResult: prevSearchResultStr,
       ),
     );
+
+    if (result != null) {
+      History h = History(
+        userId: supabase.auth.currentUser!.id,
+        search: result.address!,
+      );
+      context.read<HistoryCubit>().addHistory(h);
+    }
 
     // set state is async, so we want to animate when the states are done setting
     // so these are local vars to track states
@@ -155,7 +171,7 @@ class _SearchCardState extends State<SearchCard> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          "Hello, Sophia",
+                          "Hello, ${widget.username}",
                           style:
                               Theme.of(context).textTheme.titleLarge!.copyWith(
                                     fontWeight: FontWeight.w500,
@@ -177,7 +193,7 @@ class _SearchCardState extends State<SearchCard> {
                           child: SearchButton(
                               key: const Key("searchBar"),
                               onTap: () {
-                                onTap(widget.srcSearchResult != null);
+                                onTap(widget.srcSearchResult != null, null);
                               },
                               locationText: 'Where are you heading?'),
                           // ),
@@ -196,6 +212,35 @@ class _SearchCardState extends State<SearchCard> {
                         ),
                       ],
                     ),
+                    BlocBuilder<HistoryCubit, HistoryState>(
+                        builder: (context, state) {
+                      if (state is HistoryLoading) {
+                        return const CircularProgressIndicator();
+                      } else if (state is HistoryLoaded) {
+                        return ListView.separated(
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              final String search =
+                                  state.currentHistory[index].search;
+                              return ListTile(
+                                title: Text(search),
+                                leading: Icon(
+                                  Icons.history,
+                                  color: Colors.grey,
+                                ),
+                                onTap: () {
+                                  onTap(widget.srcSearchResult != null, search);
+                                },
+                              );
+                            },
+                            separatorBuilder: (context, index) {
+                              return const Divider();
+                            },
+                            itemCount: state.currentHistory.length);
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    })
                   ],
                 ),
               ),

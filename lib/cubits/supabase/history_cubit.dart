@@ -25,7 +25,7 @@ class HistoryCubit extends Cubit<HistoryState> {
         .stream(primaryKey: ['user_id'])
         .eq('user_id', _userId)
         .order('created_at')
-        .limit(5)
+        .limit(3)
         .map((event) => event.map<History>((e) => History.fromJson(e)).toList())
         .listen((data) {
           _history = data;
@@ -37,7 +37,7 @@ class HistoryCubit extends Cubit<HistoryState> {
         });
   }
 
-  Future<History> addHistory(History history) async {
-    return supabase.from(table).insert(history.toJson()).select();
+  void addHistory(History history) async {
+    supabase.from(table).insert(history.toJson());
   }
 }

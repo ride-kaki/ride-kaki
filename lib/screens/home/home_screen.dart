@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  google_places_sdk.Place? initialSrcLocation;
   google_places_sdk.Place? srcSearchResult;
   google_places_sdk.Place? destSearchResult;
   late GoogleMapController newGoogleMapController;
@@ -197,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onClearButtonPressed() {
     setState(() {
-      srcSearchResult = null;
+      srcSearchResult = initialSrcLocation;
       destSearchResult = null;
       markers = {};
       polylines = {};
@@ -295,6 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   .then((place) => {
                                                         setState(() {
                                                           srcSearchResult =
+                                                              place.place;
+                                                          initialSrcLocation =
                                                               place.place;
                                                           mapHook(
                                                               false,

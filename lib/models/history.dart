@@ -4,21 +4,18 @@ part "history.g.dart";
 
 @JsonSerializable()
 class History {
-  final int id;
-
   @JsonKey(name: "user_id")
   final String userId;
 
   final String search;
 
-  @JsonKey(name: "created_at")
-  final DateTime createdAt;
+  @JsonKey(name: "created_at", includeToJson: false)
+  final DateTime? createdAt;
 
   History({
-    required this.id,
     required this.userId,
     required this.search,
-    required this.createdAt,
+    this.createdAt,
   });
 
   factory History.fromJson(Map<String, dynamic> json) =>

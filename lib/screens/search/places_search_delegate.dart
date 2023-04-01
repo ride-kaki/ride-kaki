@@ -12,7 +12,7 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
           searchFieldStyle: const TextStyle(
             fontSize: 14,
           ),
-        );
+        ) {}
 
   late Future<List<AutocompletePrediction>> placesPredictionList;
   late FlutterGooglePlacesSdk flutterGooglePlacesSdk;
@@ -23,12 +23,7 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
     BuildContext context,
     String query,
   ) async {
-    if (firstQuery) {
-      firstQuery = false;
-      query = previousSearchResult;
-    }
-    // searchPlaces
-
+    // actual search
     return searchPlaces(
       context,
       query,
@@ -59,6 +54,11 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
       child: FutureBuilder<List<AutocompletePrediction>>(
         future: placesPredictionList,
         builder: (context, snapshot) {
+          if (firstQuery) {
+            firstQuery = false;
+            query = previousSearchResult;
+            buildSuggestions(context);
+          }
           if (snapshot.hasError) {
             return const Center(
                 child: Text("Failed to load results due to errors!"));
@@ -67,6 +67,8 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 final data = snapshot.data![index];
+
+                // searchPlaces
                 return ListTile(
                     horizontalTitleGap: 0,
                     leading: const Icon(
@@ -94,6 +96,7 @@ class PlacesSearchDelegate extends SearchDelegate<Place?> {
               },
             );
           } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+            // on initial load
             return const Center(child: Text(""));
           }
 
