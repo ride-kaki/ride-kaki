@@ -257,6 +257,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  onPressed() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PromoScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -468,47 +476,48 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }),
       bottomNavigationBar: srcSearchResult != null && destSearchResult != null
-          ? BottomAppBar(
-              child: FractionallySizedBox(
-                widthFactor: 0.8,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 15,
-                  ),
-                  child: SizedBox(
-                    height: 45,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.0),
-                          ),
-                        ),
-                        backgroundColor: MaterialStateProperty.all(
-                            Theme.of(context).colorScheme.secondary),
-                      ),
-                      onPressed: () {},
+          ? Container(
+              height: 100,
+              color: Colors.white24,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        onPressed();
+                      },
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                "Book Ride in App",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                      color: Colors.white,
-                                    ),
-                              ),
-                            ],
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Icon(
+                              Icons.percent_outlined,
+                              color: Colors.green,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Text(
+                              "View Available Promos",
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          Spacer(),
+                          Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.green,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             )

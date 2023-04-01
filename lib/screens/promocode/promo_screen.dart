@@ -25,7 +25,7 @@ class _PromoScreenState extends State<PromoScreen> {
                 promoDetails: "\$2 Off",
                 promoCode: "CNY2020",
                 lastRedemptionDate: DateTime.now().toString().substring(0, 10),
-                imageString: "./assets/images/grab.png",
+                imageString: "./assets/images/tada.png",
               )))
         ],
       ),

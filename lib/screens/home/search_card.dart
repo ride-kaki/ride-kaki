@@ -39,13 +39,7 @@ class _SearchCardState extends State<SearchCard> {
   DraggableScrollableController scrollController =
       DraggableScrollableController();
 
-  onPressed() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const PromoScreen(),
-      ),
-    );
-  }
+  
 
   // isUpdateDest is a boolean flag that if is true, denotes that we're updating
   // the destination, otherwise we're updating the src
